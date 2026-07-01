@@ -1,0 +1,166 @@
+{
+  "_version": "1.85.0",
+  "sap.app": {
+    "id": "pricingaction",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "0.0.1"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "resources": "resources.json",
+    "sourceTemplate": {
+      "id": "@sap/generator-fiori:fpm",
+      "version": "1.27.0",
+      "toolsId": "ce7efbee-2a10-4720-ac8b-60a03b11aba2"
+    },
+    "dataSources": {
+      "mainService": {
+        "uri": "/enhancedpricing/",
+        "type": "OData",
+        "settings": {
+          "annotations": [],
+          "odataVersion": "4.0"
+        }
+      }
+    },
+    "crossNavigation": {
+      "inbounds": {
+        "PricingAction-manage": {
+          "semanticObject": "PricingAction",
+          "action": "manage",
+          "title": "{{PricingAction-manage.flpTitle}}",
+          "signature": {
+            "parameters": {},
+            "additionalParameters": "allowed"
+          }
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "icons": {
+      "icon": "",
+      "favIcon": "",
+      "phone": "",
+      "phone@2": "",
+      "tablet": "",
+      "tablet@2": ""
+    },
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": true,
+    "dependencies": {
+      "minUI5Version": "1.149.0",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.core": {},
+        "sap.fe.macros": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "pricingaction.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "mainService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "@i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "uri": "i18n/i18n.properties"
+      }
+    },
+    "resources": {
+      "css": []
+    },
+    "routing": {
+      "config": {},
+      "routes": [
+        {
+          "name": "PricingActionHeaderMain",
+          "pattern": ":?query:",
+          "target": "PricingActionHeaderMain"
+        },
+        {
+          "name": "PricingActionHeaderObjectPage",
+          "pattern": "PricingActionHeader({PricingActionHeaderKey}):?query:",
+          "target": "PricingActionHeaderObjectPage"
+        }
+      ],
+      "targets": {
+        "PricingActionHeaderMain": {
+          "type": "Component",
+          "id": "PricingActionHeaderMain",
+          "name": "sap.fe.core.fpm",
+          "options": {
+            "settings": {
+              "navigation": {
+                "PricingActionHeader": {
+                  "detail": {
+                    "route": "PricingActionHeaderObjectPage"
+                  }
+                }
+              },
+              "contextPath": "/PricingActionHeader",
+              "viewName": "pricingaction.ext.view.Main"
+            }
+          }
+        },
+        "PricingActionHeaderObjectPage": {
+          "type": "Component",
+          "id": "PricingActionHeaderObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "navigation": {},
+              "contextPath": "/PricingActionHeader",
+              "controlConfiguration": {
+                "items/@com.sap.vocabularies.UI.v1.LineItem#ItemTable": {
+                  "tableSettings": {
+                    "type": "GridTable"
+                  },
+                  "actions": {
+                    "refresh": {
+                      "press": ".extension.pricingaction.ext.view.Main.refresh",
+                      "visible": true,
+                      "enabled": true,
+                      "requiresSelection": false,
+                      "text": "Refresh"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "sap.fe": {
+    "app": {
+      "enableLazyLoading": true
+    }
+  }
+}
