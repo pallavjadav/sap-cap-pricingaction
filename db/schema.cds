@@ -3,19 +3,20 @@ namespace enhancedpricing;
 using {
     managed,
     cuid
+
 } from '@sap/cds/common';
 
 // 1. Pricing Action Header Entity
 entity PricingActionHeader : cuid, managed {
-    Pricing_Action_ID   : String(20) @Core.Computed;
-    Pricing_Action_Name : localized String(50)  @changelog; // Must be unique
-    Pricing_Type        : String(20)  @changelog; // "Mass Pricing" or "Day-to-Day"
-    Description         : String(255) @changelog;
-    Sales_Org           : String(4)   @changelog; // Mandatory single-select
-    Season              : String(20)  @changelog; // Optional
-    SNOW_Ticket_Number  : String(20)  @changelog; // Optional ServiceNow reference
-    Overall_Status      : String(20)  @changelog;
-    Change_Date         : Timestamp   @changelog;
+    Pricing_Action_ID   : String(20)           @Core.Computed;
+    Pricing_Action_Name : localized String(50) @changelog; // Must be unique
+    Pricing_Type        : String(20)           @changelog; // "Mass Pricing" or "Day-to-Day"
+    Description         : String(255)          @changelog;
+    Sales_Org           : String(4)            @changelog; // Mandatory single-select
+    Season              : String(20)           @changelog; // Optional
+    SNOW_Ticket_Number  : String(20)           @changelog; // Optional ServiceNow reference
+    Overall_Status      : String(20)           @changelog;
+    Change_Date         : Timestamp            @changelog;
 
     // Composition link to individual material items
     items               : Composition of many PricingActionItems
@@ -74,3 +75,9 @@ extend entity PricingActionHeader with {
     @UI.Hidden: true
     HiddenFileName : String;
 };
+
+
+entity Season {
+    key Name : String(20);
+        Desc : String(100);
+}

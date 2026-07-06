@@ -6,7 +6,10 @@
     "@cap-js/hana": "^2",
     "@sap/cds": "^9",
     "@sap/xssec": "^4",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "@sap-cloud-sdk/connectivity": "^4",
+    "@sap-cloud-sdk/http-client": "^4",
+    "@sap-cloud-sdk/resilience": "^4"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2.4",
@@ -30,7 +33,23 @@
       },
       "destinations": true,
       "html5-repo": true,
-      "application-logging": true
+      "application-logging": true,
+      "API_SALESORGANIZATION_SRV": {
+        "kind": "odata-v2",
+        "model": "srv/external/API_SALESORGANIZATION_SRV",
+        "credentials": {
+          "destination": "S4H_Sandbox_API",
+          "path": "/s4hanacloud/sap/opu/odata/sap/API_SALESORGANIZATION_SRV"
+        }
+      },
+      "API_PRODUCT_SRV": {
+        "kind": "odata-v2",
+        "model": "srv/external/API_PRODUCT_SRV",
+        "credentials": {
+          "destination": "S4H_Sandbox_API",
+          "path": "/s4hanacloud/sap/opu/odata/sap/API_PRODUCT_SRV"
+        }
+      }
     }
   },
   "workspaces": [

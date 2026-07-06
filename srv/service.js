@@ -113,6 +113,26 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
       return next();
     })
 
+    this.on('READ', 'A_SalesOrganization', async (req) => {
+      const API_SALESORGANIZATION_SRV = await cds.connect.to('API_SALESORGANIZATION_SRV');
+      return await API_SALESORGANIZATION_SRV.send({
+        query: req.query,
+        headers:{
+          APIKey: process.env.APIKey
+        }
+      })
+    })
+
+    this.on('READ', 'A_Product', async (req) => {
+      const API_PRODUCT_SRV = await cds.connect.to('API_PRODUCT_SRV');
+      return await API_PRODUCT_SRV.send({
+        query: req.query,
+        headers:{
+          APIKey: process.env.APIKey
+        }
+      })
+    })
+
  
 
     return super.init()

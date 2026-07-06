@@ -1,5 +1,6 @@
 using { enhancedpricing as db  } from '../db/schema';
-
+using {API_SALESORGANIZATION_SRV as external} from './external/API_SALESORGANIZATION_SRV';
+using {API_PRODUCT_SRV as external1} from './external/API_PRODUCT_SRV';
 
 @path: '/enhancedpricing'
 service EnhancedPricingService {
@@ -15,36 +16,8 @@ service EnhancedPricingService {
         action GetMaterials();
     };
 
-
-entity PricingStatusChart  as
-        select from db.PricingActionHeader {
-         key   Overall_Status as Status,
-         key   cast(
-                    count( * ) as Integer
-                )              as Count
-        }
-        group by
-            Overall_Status;
-
-
-annotate PricingStatusChart with @(UI:{
-PresentationVariant #StatusPath: {
-            Visualizations: ['@UI.Chart#StatusPath'],
-           
-        },
-Chart: {
-    Title              : 'Pricing Status',
-    ChartType          : #Donut,
-    Dimensions         : [Status],
-    DimensionAttributes: [{
-        Dimension: Status,
-        Role     : #Category
-    }],
-    Measures           : [Count],
-    MeasureAttributes  : [{
-        Measure: Count,
-        Role   : #Axis1
-    }]
-}});
+    entity A_SalesOrganization as projection on external.A_SalesOrganization;
+    entity A_Product as projection on external1.A_Product;
+    entity Seasons as projection on db.Season;
 
 }

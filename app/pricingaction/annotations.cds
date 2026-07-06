@@ -138,3 +138,62 @@ annotate EnhancedPricingService.PricingActionItems with @(
     ]
 );
 
+annotate EnhancedPricingService.PricingActionHeader with {
+    Sales_Org @(
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'A_SalesOrganization',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : Sales_Org,
+                    ValueListProperty : 'SalesOrganization',
+                },
+            ],
+            Label : 'Sales Organization',
+        },
+        Common.ValueListWithFixedValues : true,
+)};
+
+annotate EnhancedPricingService.A_SalesOrganization with {
+    SalesOrganization @Common.Text : CompanyCode
+};
+
+annotate EnhancedPricingService.PricingActionItems with {
+    Material_Number @(
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'A_Product',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : Material_Number,
+                    ValueListProperty : 'Product',
+                },
+            ],
+            Label : 'Material',
+        },
+        Common.ValueListWithFixedValues : true,
+)};
+
+annotate EnhancedPricingService.PricingActionHeader with {
+    Season @(
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'Seasons',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : Season,
+                    ValueListProperty : 'Name',
+                },
+            ],
+            Label : 'Season',
+        },
+        Common.ValueListWithFixedValues : true,
+)};
+
+annotate EnhancedPricingService.Seasons with {
+    Name @Common.Text : Desc
+};
+
