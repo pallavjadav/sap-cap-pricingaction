@@ -151,7 +151,8 @@
                     }
                   }
                 }
-              }
+              },
+              "editableHeaderContent": false
             }
           }
         }

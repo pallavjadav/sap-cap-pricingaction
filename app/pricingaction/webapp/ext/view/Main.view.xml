@@ -1,9 +1,13 @@
 <mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:macros="sap.fe.macros" xmlns:html="http://www.w3.org/1999/xhtml" controllerName="pricingaction.ext.view.Main" xmlns:macrosTable="sap.fe.macros.table">
-    <Page id="Main" title="{i18n>MainTitle}">
+    <Page id="Main" title="{i18n&gt;MainTitle}">
         <content>
             <macros:FilterBar id="FilterBar" metaPath="/PricingActionHeader/@com.sap.vocabularies.UI.v1.SelectionFields#filterBarMacro"/>
             <macros:Table id="Table" metaPath="/PricingActionHeader/@com.sap.vocabularies.UI.v1.LineItem#tableMacro" filterBar="FilterBar" header="Pricing Action" readOnly="true">
                 <macros:massEdit/>
+                <macros:actions>
+                    <macrosTable:Action id="day-2-day-Main.controller" key="day-2-day-Main.controller" text="Day 2 Day" press=".pressDay2Day" requiresSelection="false"/>
+                    <macrosTable:Action id="mass-Main.controller" key="mass-Main.controller" text="Mass" press=".createMass" requiresSelection="false"/>
+                </macros:actions>
             </macros:Table>
         </content>
     </Page>

@@ -86,6 +86,18 @@ annotate EnhancedPricingService.PricingActionHeader with @(
             },
         ],
     },
+    UI.HeaderInfo : {
+        TypeName : 'PricingAction',
+        TypeNamePlural : 'PricingAction',
+        Title : {
+            $Type : 'UI.DataField',
+            Value : Pricing_Action_Name,
+        },
+        Description : {
+            $Type : 'UI.DataField',
+            Value : Pricing_Type,
+        },
+    },
 );
 
 

@@ -19,6 +19,26 @@ sap.ui.define(
                     console.log("refresh");
                     this.getView().byId("pricingaction::PricingActionHeaderObjectPage--fe::table::items::LineItem::ItemTable").getModel().refresh()
                 },
+                pressDay2Day: function() {
+                    console.log("pressDay2Day");
+                    const list = this.getView().getModel().bindList("/PricingActionHeader")
+                    this.editFlow.createDocument(list, {
+                        creationMode:"NewPage",
+                        data:{
+                            Pricing_Type: "D"
+                        }
+                    });
+                },
+                createMass: function() {
+                    console.log("mass");
+                    const list = this.getView().getModel().bindList("/PricingActionHeader")
+                    this.editFlow.createDocument(list, {
+                        creationMode: "NewPage",
+                        data: {
+                            Pricing_Type: "M"
+                        }
+                    });
+                },
 
             /**
              * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
