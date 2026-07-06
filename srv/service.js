@@ -3,11 +3,11 @@ const XLSX = require('xlsx');
 
 
 const logger = cds.log('EnhancedPricingService')
-
 module.exports = class EnhancedPricingService extends cds.ApplicationService {
-  init() {
-
+ async init() {
+    
     const { PricingActionHeader, PricingStatusChart, PricingActionItems } = cds.entities('EnhancedPricingService')
+    const API_SALESORGANIZATION_SRV = await cds.connect.to('API_SALESORGANIZATION_SRV');
 
     this.on('GetMaterials', 'PricingActionHeader.drafts', async (req) => {
       // get data from header draft table
@@ -113,15 +113,69 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
       return next();
     })
 
+    //traces example for below 
+      //  [trace] - elapsed times:
+
+      //  0.00 → 356.44 = 356.44 ms - GET / enhancedpricing / A_SalesOrganization
+
+      //  0.99 → 355.80 = 354.81 ms - EnhancedPricingService - READ EnhancedPricingService.A_SalesOrganization
+
+      //  1.72 → 355.64 = 353.92 ms - API_SALESORGANIZATION_SRV - READ API_SALESORGANIZATION_SRV.A_SalesOrganization
+
+      // -----------------------------MEANING BELOW-----------------------------
+      //    0 ms
+      // │
+      // │ HTTP request received
+      // │
+      // ├── 0.99 ms
+      // │     Your READ handler starts
+      // │
+      // ├── 1.72 ms
+      // │     Remote OData call starts
+      // │
+      // │
+      // │<<<<<<<<<<<< waiting for remote system >>>>>>>>>>>>
+      // │
+      // │
+      // ├──355.64 ms
+      // │     Remote OData response received
+      // │
+      // ├──355.80 ms
+      // │     Your handler returns result
+      // │
+      // └──356.44 ms
+      //       HTTP response sent
     this.on('READ', 'A_SalesOrganization', async (req) => {
-      const API_SALESORGANIZATION_SRV = await cds.connect.to('API_SALESORGANIZATION_SRV');
-      return await API_SALESORGANIZATION_SRV.send({
-        query: req.query,
-        headers:{
-          APIKey: process.env.APIKey
-        }
-      })
+      const correlationId = cds.context.id
+      // correlation_id: b788361d - 931c - 4aec - 42ee - f92581eca289 AND level: DEBUG AND logger: EnhancedPricingService
+      logger.info(
+        `Starting READ for A_SalesOrganization. correlationId=${correlationId}`
+      )
+      logger.debug('READ event triggered for A_SalesOrganization:', req.query)
+      try {
+        const result = await API_SALESORGANIZATION_SRV.send({
+          query: req.query,
+          headers:{
+            APIKey: process.env.APIKey
+          }
+        })
+        logger.info('Result from A_SalesOrganization:', result.length)
+        logger.info(
+          `Fetched ${result.length} records. correlationId=${correlationId}`
+        )
+        logger.debug('READ event triggered for A_SalesOrganization:', result)
+        return result
+      } catch (error) {
+        
+        logger.error(
+          `Remote service failed. correlationId=${correlationId}`,
+          error
+        )
+        req.error(400,`Remote service failed: use correlation id for debugging this issue : ${correlationId}`, { correlationId })
+      }
+      
     })
+
 
     this.on('READ', 'A_Product', async (req) => {
       const API_PRODUCT_SRV = await cds.connect.to('API_PRODUCT_SRV');
