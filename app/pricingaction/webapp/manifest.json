@@ -140,15 +140,6 @@
                 "items/@com.sap.vocabularies.UI.v1.LineItem#ItemTable": {
                   "tableSettings": {
                     "type": "GridTable"
-                  },
-                  "actions": {
-                    "refresh": {
-                      "press": ".extension.pricingaction.ext.view.Main.refresh",
-                      "visible": true,
-                      "enabled": true,
-                      "requiresSelection": false,
-                      "text": "Refresh"
-                    }
                   }
                 }
               },

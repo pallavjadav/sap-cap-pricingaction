@@ -11,34 +11,30 @@ sap.ui.define(
              * Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
              * @memberOf pricingaction.ext.view.Main
              */
-             onInit: function () {
-                 PageController.prototype.onInit.apply(this, arguments); // needs to be called to properly initialize the page controller
+            onInit: function () {
+                PageController.prototype.onInit.apply(this, arguments); // needs to be called to properly initialize the page controller
                 this.getAppComponent().getModel("ui").setProperty("/isEditable", true);
-                },
-                refresh: function() {
-                    console.log("refresh");
-                    this.getView().byId("pricingaction::PricingActionHeaderObjectPage--fe::table::items::LineItem::ItemTable").getModel().refresh()
-                },
-                pressDay2Day: function() {
-                    console.log("pressDay2Day");
-                    const list = this.getView().getModel().bindList("/PricingActionHeader")
-                    this.editFlow.createDocument(list, {
-                        creationMode:"NewPage",
-                        data:{
-                            Pricing_Type: "D"
-                        }
-                    });
-                },
-                createMass: function() {
-                    console.log("mass");
-                    const list = this.getView().getModel().bindList("/PricingActionHeader")
-                    this.editFlow.createDocument(list, {
-                        creationMode: "NewPage",
-                        data: {
-                            Pricing_Type: "M"
-                        }
-                    });
-                },
+            },
+            pressDay2Day: function () {
+                console.log("pressDay2Day");
+                const list = this.getView().getModel().bindList("/PricingActionHeader")
+                this.editFlow.createDocument(list, {
+                    creationMode: "NewPage",
+                    data: {
+                        Pricing_Type: "D"
+                    }
+                });
+            },
+            createMass: function () {
+                console.log("mass");
+                const list = this.getView().getModel().bindList("/PricingActionHeader")
+                this.editFlow.createDocument(list, {
+                    creationMode: "NewPage",
+                    data: {
+                        Pricing_Type: "M"
+                    }
+                });
+            },
 
             /**
              * Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered

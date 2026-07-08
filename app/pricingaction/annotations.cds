@@ -56,18 +56,13 @@ annotate EnhancedPricingService.PricingActionHeader with @(
             },
             {
                 $Type : 'UI.DataField',
-                Value : items.Material_Number,
-                Label : 'Material_Number',
-            },
-            {
-                $Type : 'UI.DataField',
                 Value : Pricing_Action_Name,
                 Label : 'Pricing_Action_Name',
             },
             {
                 $Type : 'UI.DataField',
-                Value : Pricing_Type,
-                Label : 'Pricing_Type',
+                Value : items.Material_Number,
+                Label : 'Material_Number',
             },
             {
                 $Type : 'UI.DataField',
@@ -95,7 +90,7 @@ annotate EnhancedPricingService.PricingActionHeader with @(
         },
         Description : {
             $Type : 'UI.DataField',
-            Value : Pricing_Type,
+            Value : Pricing_Action_ID,
         },
     },
 );
@@ -109,11 +104,13 @@ annotate EnhancedPricingService.PricingActionItems with @(
             $Type : 'UI.DataField',
             Value : Material_Number,
             Label : 'Material_Number',
+           
         },
         {
             $Type : 'UI.DataField',
             Value : Material_Description,
             Label : 'Material_Description',
+            
         },
         {
             $Type : 'UI.DataField',
@@ -135,6 +132,11 @@ annotate EnhancedPricingService.PricingActionItems with @(
             Value : To_Date,
             Label : 'To_Date',
         },
+        {
+            $Type : 'UI.DataField',
+            Value : priceChangePercentage,
+            Label : 'priceChangePercentage',
+        },
     ]
 );
 
@@ -153,6 +155,7 @@ annotate EnhancedPricingService.PricingActionHeader with {
             Label : 'Sales Organization',
         },
         Common.ValueListWithFixedValues : true,
+        Common.FieldControl : #Mandatory,
 )};
 
 annotate EnhancedPricingService.A_SalesOrganization with {
@@ -195,5 +198,9 @@ annotate EnhancedPricingService.PricingActionHeader with {
 
 annotate EnhancedPricingService.Seasons with {
     Name @Common.Text : Desc
+};
+
+annotate EnhancedPricingService.PricingActionHeader with {
+    Pricing_Action_Name @Common.FieldControl : #Mandatory
 };
 

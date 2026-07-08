@@ -12,7 +12,7 @@ entity PricingActionHeader : cuid, managed {
     Pricing_Action_Name : localized String(50) @changelog; // Must be unique
     Pricing_Type        : String(20)           @changelog; // "Mass Pricing" or "Day-to-Day"
     Description         : String(255)          @changelog;
-    Sales_Org           : String(4)            @changelog; // Mandatory single-select
+    Sales_Org           : String(4)  @mandatory          @changelog; // Mandatory single-select
     Season              : String(20)           @changelog; // Optional
     SNOW_Ticket_Number  : String(20)           @changelog; // Optional ServiceNow reference
     Overall_Status      : String(20)           @changelog;
@@ -49,6 +49,21 @@ entity PricingActionItems : managed, cuid {
     Record_Status        : String(20)     @changelog; // New, In Validation, Valid, Published, Error, Cancelled, Rejected
     Comments             : LargeString    @changelog; // Captures exception notes, SAP errors, and validations
 }
+
+extend PricingActionItems with {
+   priceChangePercentage : Decimal(5, 2) = (
+        case
+            when Old_Sch3 = 0
+                 then 0.00
+            else (
+                     (
+                         New_Sch3 - Old_Sch3
+                     ) / Old_Sch3
+                 ) * 100
+        end
+    );
+};
+
 
 /*
  * Stream Content (as BLOB)

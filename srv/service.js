@@ -9,13 +9,49 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
     const { PricingActionHeader, PricingStatusChart, PricingActionItems } = cds.entities('EnhancedPricingService')
     const API_SALESORGANIZATION_SRV = await cds.connect.to('API_SALESORGANIZATION_SRV');
 
+
+   this.before('CREATE', 'PricingActionHeader', async (req) => {
+     const db = await cds.connect.to('db');
+     const result = await db.run(`SELECT "myseq".NEXTVAL AS NEXT_ID FROM DUMMY`);
+
+     logger.info('Next ID from sequence:', result);
+
+     // 1. Extract the raw numeric value from the result object
+     const rawId = result[0].NEXT_ID; // 1
+
+     // 2. Convert to string, pad with 9 zeros, and prepend 'M'
+     const formattedId = req.data.Pricing_Type + String(rawId).padStart(9, '0'); // "M000000001"
+
+     // 3. Assign it to your field
+     req.data.Pricing_Action_ID = formattedId;
+   });
+
     this.on('GetMaterials', 'PricingActionHeader.drafts', async (req) => {
       // get data from header draft table
       // get material details from S4/Virtual Table  and update the material draft table 
       // console.log('GetMaterials action called', req)
 
-      let filterData = await SELECT.one.from(PricingActionHeader.drafts).where({ ID: req.params[0].ID })
+      let filterData = await SELECT.one.from(PricingActionHeader.drafts, (pah)=>{
+        pah`.*`,
+        pah.items((items)=>{
+          items`.*`
+        })
+
+
+      }).where({ ID: req.params[0].ID })
+
+      if(!filterData.Sales_Org){
+       req.error(400, 'Sales Organization is mandatory','Sales_Org')
+   
+      }
+      if ((!filterData.Season || String(filterData.Season).trim() === '') &&
+        (!filterData.items || filterData.items.length === 0)) {
+        req.error(400, 'Either Season or at least one Item must be provided', 'Season|items')
+      }
+      
+
       logger.info('Filter Data:', filterData)
+
       await INSERT.into(PricingActionItems.drafts).entries([
         {
           "ID": "f8d2a101-1b34-4d91-9d4f-000000000045",
