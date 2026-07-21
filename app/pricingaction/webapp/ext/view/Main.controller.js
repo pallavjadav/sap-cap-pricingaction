@@ -15,8 +15,11 @@ sap.ui.define(
                 PageController.prototype.onInit.apply(this, arguments); // needs to be called to properly initialize the page controller
                 this.getAppComponent().getModel("ui").setProperty("/isEditable", true);
             },
+            _getText: function (sKey) {
+                return this.getView().getModel("i18n").getResourceBundle().getText(sKey);
+            },
             pressDay2Day: function () {
-                console.log("pressDay2Day");
+                console.log(this._getText("pressDay2Day"));
                 const list = this.getView().getModel().bindList("/PricingActionHeader")
                 this.editFlow.createDocument(list, {
                     creationMode: "NewPage",
@@ -26,7 +29,7 @@ sap.ui.define(
                 });
             },
             createMass: function () {
-                console.log("mass");
+                console.log(this._getText("mass"));
                 const list = this.getView().getModel().bindList("/PricingActionHeader")
                 this.editFlow.createDocument(list, {
                     creationMode: "NewPage",

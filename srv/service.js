@@ -4,51 +4,52 @@ const XLSX = require('xlsx');
 
 const logger = cds.log('EnhancedPricingService')
 module.exports = class EnhancedPricingService extends cds.ApplicationService {
- async init() {
-    
+  async init() {
+
     const { PricingActionHeader, PricingStatusChart, PricingActionItems } = cds.entities('EnhancedPricingService')
     const API_SALESORGANIZATION_SRV = await cds.connect.to('API_SALESORGANIZATION_SRV');
 
 
-   this.before('CREATE', 'PricingActionHeader', async (req) => {
-     const db = await cds.connect.to('db');
-     const result = await db.run(`SELECT "myseq".NEXTVAL AS NEXT_ID FROM DUMMY`);
 
-     logger.info('Next ID from sequence:', result);
+    this.before('CREATE', 'PricingActionHeader', async (req) => {
+      const db = await cds.connect.to('db');
+      const result = await db.run(`SELECT "myseq".NEXTVAL AS NEXT_ID FROM DUMMY`);
 
-     // 1. Extract the raw numeric value from the result object
-     const rawId = result[0].NEXT_ID; // 1
+      logger.info('Next ID from sequence:', result);
 
-     // 2. Convert to string, pad with 9 zeros, and prepend 'M'
-     const formattedId = req.data.Pricing_Type + String(rawId).padStart(9, '0'); // "M000000001"
+      // 1. Extract the raw numeric value from the result object
+      const rawId = result[0].NEXT_ID; // 1
 
-     // 3. Assign it to your field
-     req.data.Pricing_Action_ID = formattedId;
-   });
+      // 2. Convert to string, pad with 9 zeros, and prepend 'M'
+      const formattedId = req.data.Pricing_Type + String(rawId).padStart(9, '0'); // "M000000001"
+
+      // 3. Assign it to your field
+      req.data.Pricing_Action_ID = formattedId;
+    });
 
     this.on('GetMaterials', 'PricingActionHeader.drafts', async (req) => {
       // get data from header draft table
       // get material details from S4/Virtual Table  and update the material draft table 
       // console.log('GetMaterials action called', req)
 
-      let filterData = await SELECT.one.from(PricingActionHeader.drafts, (pah)=>{
+      let filterData = await SELECT.one.from(PricingActionHeader.drafts, (pah) => {
         pah`.*`,
-        pah.items((items)=>{
-          items`.*`
-        })
+          pah.items((items) => {
+            items`.*`
+          })
 
 
       }).where({ ID: req.params[0].ID })
 
-      if(!filterData.Sales_Org){
-       req.error(400, 'Sales Organization is mandatory','Sales_Org')
-   
+      if (!filterData.Sales_Org) {
+        req.error(400, 'Sales Organization is mandatory', 'Sales_Org')
+
       }
       if ((!filterData.Season || String(filterData.Season).trim() === '') &&
         (!filterData.items || filterData.items.length === 0)) {
         req.error(400, 'Either Season or at least one Item must be provided', 'Season|items')
       }
-      
+
 
       logger.info('Filter Data:', filterData)
 
@@ -77,7 +78,7 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
           "modifiedAt": "2026-07-01T10:00:00Z",
           "modifiedBy": "user.one@company.com",
           "IsActiveEntity": false,
-          "DraftAdministrativeData_DraftUUID":filterData.DraftAdministrativeData_DraftUUID
+          "DraftAdministrativeData_DraftUUID": filterData.DraftAdministrativeData_DraftUUID
         },
         {
           "ID": "f8d2a101-1b34-4d91-9d4f-000000000046",
@@ -140,7 +141,7 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
         item.From_Date = new Date(Date.UTC(1899, 11, 30) + 46204 * 86400000)
           .toISOString()
           .split("T")[0]
-          item.To_Date = new Date(Date.UTC(1899, 11, 30) + 46204 * 86400000)
+        item.To_Date = new Date(Date.UTC(1899, 11, 30) + 46204 * 86400000)
           .toISOString()
           .split("T")[0]
       });
@@ -149,38 +150,85 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
       return next();
     })
 
+    this.after('READ', 'Products', async (products,req) => {
+      if (!Array.isArray(products)) {
+        products = [products];
+      }
+
+      products.forEach(product => {
+        switch (product.Title) {
+          case "Desktop":
+            product.NodeType = "sap-icon://desktop-mobile";
+            break;
+
+          case "Laptop":
+            product.NodeType = "sap-icon://laptop";
+            break;
+
+          case "CPU":
+            product.NodeType = "sap-icon://physical-activity";
+            break;
+
+          case "Graphics card":
+            product.NodeType = "sap-icon://palette";
+            break;
+
+          case "RAM":
+            product.NodeType = "sap-icon://database";
+            break;
+
+          case "Keyboard":
+            product.NodeType = "sap-icon://keyboard-and-mouse";
+            break;
+
+          case "Mouse":
+            product.NodeType = "sap-icon://cursor-arrow";
+            break;
+
+          case "Screen":
+          case "Integrated screen":
+            product.NodeType = "sap-icon://screen";
+            break;
+
+          default:
+            product.NodeType = "sap-icon://product";
+        }
+      });
+
+      console.log("After READ event triggered for Product:", products);
+    })
     //traces example for below 
-      //  [trace] - elapsed times:
+    //  [trace] - elapsed times:
 
-      //  0.00 → 356.44 = 356.44 ms - GET / enhancedpricing / A_SalesOrganization
+    //  0.00 → 356.44 = 356.44 ms - GET / enhancedpricing / A_SalesOrganization
 
-      //  0.99 → 355.80 = 354.81 ms - EnhancedPricingService - READ EnhancedPricingService.A_SalesOrganization
+    //  0.99 → 355.80 = 354.81 ms - EnhancedPricingService - READ EnhancedPricingService.A_SalesOrganization
 
-      //  1.72 → 355.64 = 353.92 ms - API_SALESORGANIZATION_SRV - READ API_SALESORGANIZATION_SRV.A_SalesOrganization
+    //  1.72 → 355.64 = 353.92 ms - API_SALESORGANIZATION_SRV - READ API_SALESORGANIZATION_SRV.A_SalesOrganization
 
-      // -----------------------------MEANING BELOW-----------------------------
-      //    0 ms
-      // │
-      // │ HTTP request received
-      // │
-      // ├── 0.99 ms
-      // │     Your READ handler starts
-      // │
-      // ├── 1.72 ms
-      // │     Remote OData call starts
-      // │
-      // │
-      // │<<<<<<<<<<<< waiting for remote system >>>>>>>>>>>>
-      // │
-      // │
-      // ├──355.64 ms
-      // │     Remote OData response received
-      // │
-      // ├──355.80 ms
-      // │     Your handler returns result
-      // │
-      // └──356.44 ms
-      //       HTTP response sent
+    // -----------------------------MEANING BELOW-----------------------------
+    //    0 ms
+    // │
+    // │ HTTP request received
+    // │
+    // ├── 0.99 ms
+    // │     Your READ handler starts
+    // │
+    // ├── 1.72 ms
+    // │     Remote OData call starts
+    // │
+    // │
+    // │<<<<<<<<<<<< waiting for remote system >>>>>>>>>>>>
+    // │
+    // │
+    // ├──355.64 ms
+    // │     Remote OData response received
+    // │
+    // ├──355.80 ms
+    // │     Your handler returns result
+    // │
+    // └──356.44 ms
+    //       HTTP response sent
     this.on('READ', 'A_SalesOrganization', async (req) => {
       const correlationId = cds.context.id
       // correlation_id: b788361d - 931c - 4aec - 42ee - f92581eca289 AND level: DEBUG AND logger: EnhancedPricingService
@@ -191,7 +239,7 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
       try {
         const result = await API_SALESORGANIZATION_SRV.send({
           query: req.query,
-          headers:{
+          headers: {
             APIKey: process.env.APIKey
           }
         })
@@ -202,14 +250,14 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
         logger.debug('READ event triggered for A_SalesOrganization:', result)
         return result
       } catch (error) {
-        
+
         logger.error(
           `Remote service failed. correlationId=${correlationId}`,
           error
         )
-        req.error(400,`Remote service failed: use correlation id for debugging this issue : ${correlationId}`, { correlationId })
+        req.error(400, `Remote service failed: use correlation id for debugging this issue : ${correlationId}`, { correlationId })
       }
-      
+
     })
 
 
@@ -217,13 +265,13 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
       const API_PRODUCT_SRV = await cds.connect.to('API_PRODUCT_SRV');
       return await API_PRODUCT_SRV.send({
         query: req.query,
-        headers:{
+        headers: {
           APIKey: process.env.APIKey
         }
       })
     })
 
- 
+
 
     return super.init()
   }

@@ -96,3 +96,29 @@ entity Season {
     key Name : String(20);
         Desc : String(100);
 }
+
+
+entity Products @(Common: {SemanticKey: [ID]}) {
+    key ID                     : String  @title: 'Identifier'  @Core.Computed;
+        Title                  : String  @title: 'Product Title';
+        Description            : String  @title: 'Product Description';
+        ParentID               : String;
+        Parent                 : Association to one Products
+                                     on Parent.ID = ParentID;
+        virtual NodeType             : String  @title: 'Node Type' @Core.Computed;
+
+        @Core.Computed: true
+        LimitedDescendantCount : Integer64;
+
+        @Core.Computed: true
+        DistanceFromRoot       : Integer64;
+
+        @Core.Computed: true
+        DrillState             : String;
+
+        @Core.Computed: true
+        Matched                : Boolean;
+
+        @Core.Computed: true
+        MatchedDescendantCount : Integer64;
+}

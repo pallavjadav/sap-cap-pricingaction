@@ -1,0 +1,24 @@
+<mvc:View xmlns:core="sap.ui.core" xmlns:mvc="sap.ui.core.mvc" xmlns="sap.m" xmlns:macros="sap.fe.macros" 
+xmlns:table="sap.fe.macros.table"
+xmlns:html="http://www.w3.org/1999/xhtml" controllerName="treetable.ext.view.Main">
+    <Page id="Main" title="{i18n>MainTitle}">
+        <content>
+            <macros:FilterBar id="FilterBar" metaPath="/Products/@com.sap.vocabularies.UI.v1.SelectionFields#filterBarMacro"/>
+            <macros:TreeTable id="Table" metaPath="/Products/@com.sap.vocabularies.UI.v1.LineItem#tableMacro" filterBar="FilterBar" header="Tree Table" hierarchyQualifier="ProductsHierarchy"  >
+            <macros:columns>
+            <table:Column anchor="Title" header="Material" >
+            
+                <HBox  alignItems="Center"
+    fitContainer="true"
+    class="sapUiTinyMarginBegin sapUiTinyMarginEnd">
+                    <!-- <core:Icon src="{path:'Title', formatter:'.formatter.getIcon'}" /> -->
+                    <core:Icon src="{path:'NodeType'}" class="sapUiSmallMarginEnd" />
+                    <Text text="{Title}"/>
+                </HBox>
+            
+        </table:Column>
+            </macros:columns>
+            </macros:TreeTable>
+        </content>
+    </Page>
+</mvc:View>

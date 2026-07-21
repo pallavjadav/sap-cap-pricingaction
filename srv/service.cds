@@ -25,6 +25,34 @@ service EnhancedPricingService {
         SourceProperties: ['items/New_Sch3'],
         TargetProperties: ['items/priceChangePercentage'],
     }, };
-    
+
+    // tree table for products hierarchy
+    @Aggregation.RecursiveHierarchy #ProductsHierarchy: {
+        NodeProperty            : ID,
+        ParentNavigationProperty: Parent
+    }
+    @Hierarchy.RecursiveHierarchy #ProductsHierarchy  : {
+        ExternalKey           : ID,
+        LimitedDescendantCount: LimitedDescendantCount,
+        DistanceFromRoot      : DistanceFromRoot,
+        DrillState            : DrillState,
+        Matched               : Matched,
+        MatchedDescendantCount: MatchedDescendantCount
+    }
+    @Capabilities.FilterRestrictions                  : {NonFilterableProperties: [
+        LimitedDescendantCount,
+        DistanceFromRoot,
+        DrillState,
+        Matched,
+        MatchedDescendantCount
+    ]}
+    @Capabilities.SortRestrictions                    : {NonSortableProperties: [
+        LimitedDescendantCount,
+        DistanceFromRoot,
+        DrillState,
+        Matched,
+        MatchedDescendantCount
+    ]}
+    entity Products as projection on db.Products;
 
 }

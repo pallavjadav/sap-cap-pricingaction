@@ -22,7 +22,8 @@
     "watch": "cds watch --profile hybrid --open pricingaction/index.html?sap-ui-xx-viewCache=false --livereload false",
     "undeploy": "cf undeploy pricingaction --delete-services --delete-service-keys --delete-service-brokers",
     "build": "rimraf resources mta_archives && mbt build --mtar archive",
-    "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
+    "deploy": "cf deploy mta_archives/archive.mtar --retries 1",
+    "watch-treetable": "cds watch --open treetable/index.html?sap-ui-xx-viewCache=false --livereload false"
   },
   "private": true,
   "cds": {
@@ -55,6 +56,7 @@
     "app/*"
   ],
   "sapux": [
-    "app/pricingaction"
+    "app/pricingaction",
+    "app/treetable"
   ]
 }
