@@ -5,11 +5,14 @@ annotate service.Products with @(
     UI.LineItem #tableMacro : [
         {
             $Type: 'UI.DataField',
-            Value: ID,
+            Value: Title,
+            Criticality: 0,
+            CriticalityRepresentation : #OnlyIcon
         },
         {
             $Type: 'UI.DataField',
-            Value: Title,
+            Value: ID,
+            IconUrl : 'sap-icon://desktop-mobile',
         },
         {
             $Type: 'UI.DataField',

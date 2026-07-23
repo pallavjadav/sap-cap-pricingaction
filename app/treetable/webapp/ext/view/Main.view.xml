@@ -6,14 +6,13 @@ xmlns:html="http://www.w3.org/1999/xhtml" controllerName="treetable.ext.view.Mai
             <macros:FilterBar id="FilterBar" metaPath="/Products/@com.sap.vocabularies.UI.v1.SelectionFields#filterBarMacro"/>
             <macros:TreeTable id="Table" metaPath="/Products/@com.sap.vocabularies.UI.v1.LineItem#tableMacro" filterBar="FilterBar" header="Tree Table" hierarchyQualifier="ProductsHierarchy"  >
             <macros:columns>
-            <table:Column anchor="Title" header="Material" >
+            <table:Column anchor="DataField::Title" header="Title with Icon" disableExport="false" key="TitleWithIcon" placement="Before" >
             
                 <HBox  alignItems="Center"
     fitContainer="true"
     class="sapUiTinyMarginBegin sapUiTinyMarginEnd">
                     <!-- <core:Icon src="{path:'Title', formatter:'.formatter.getIcon'}" /> -->
                     <core:Icon src="{path:'NodeType'}" class="sapUiSmallMarginEnd" />
-                    <Text text="{Title}"/>
                 </HBox>
             
         </table:Column>
