@@ -1,0 +1,7 @@
+salesorg,schedule1,schedule2,schedule3,schedule4
+US01,true,true,true,true
+CA01,false,true,true,false
+MX01,false,false,true,false
+US05,false,false,true,false
+US06,false,false,true,false
+US07,false,false,true,false
