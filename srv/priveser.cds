@@ -7,13 +7,4 @@ service SchedulePriceRulesService {
     entity SalesOrgSchedules  as projection on hpr.SalesOrgSchedules;
 }
 
-annotate SchedulePriceRulesService.SchedulePriceRules with @(Common.SideEffects #SalesOrgChanged: {
-    SourceProperties: [salesorg],
-    TargetProperties: [
-        sched1Price,
-        sched2Price,
-        sched3Price,
-        sched4Price
-    ],
-    EffectTypes     : #FieldControlChange
-});
+

@@ -1,4 +1,5 @@
 using SchedulePriceRulesService as service from '../../srv/priveser';
+
 annotate service.SchedulePriceRules with @(
     UI.FieldGroup #GeneratedGroup : {
         $Type : 'UI.FieldGroupType',
@@ -82,10 +83,35 @@ annotate service.SchedulePriceRules with @(
             $Type : 'UI.DataField',
             Value : sched2Price,
         },
+        {
+            $Type : 'UI.DataField',
+            Value : sched3Price,
+        },
+        {
+            $Type : 'UI.DataField',
+            Value : sched4Price,
+        },
     ],
 );
 
 annotate service.SchedulePriceRules with {
+
+    salesorg
+    @(
+        Common.ValueList : {
+            $Type : 'Common.ValueListType',
+            CollectionPath : 'SalesOrgSchedules',
+            Parameters : [
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : salesorg,
+                    ValueListProperty : 'salesorg',
+                },
+            ],
+            Label : 'Sales Organization',
+        },
+        Common.ValueListWithFixedValues : true,
+    );
 
     sched1Price
     @Common.FieldControl: fieldControl1;
@@ -115,10 +141,18 @@ annotate service.SchedulePriceRules with {
 annotate service.SchedulePriceRules with @(Common.SideEffects #SalesOrgChanged: {
     SourceProperties: [salesorg],
     TargetProperties: [
-        fieldControl1,
-        fieldControl2,
-        fieldControl3,
-        fieldControl4
+        'fieldControl1',
+        'fieldControl2',
+        'fieldControl3',
+        'fieldControl4',
+        'sched1Price',
+        'sched2Price',
+        'sched3Price',
+        'sched4Price',
+        'sched1ScaleQty',
+        'sched2ScaleQty',
+        'sched3ScaleQty',
+        'sched4ScaleQty'
     ]
 });
 
@@ -128,3 +162,4 @@ annotate service.SchedulePriceRules with @UI.PresentationVariant: {RequestAtLeas
     fieldControl3,
     fieldControl4
 ]};
+

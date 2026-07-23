@@ -7,64 +7,55 @@ module.exports = cds.service.impl(function () {
         SalesOrgSchedules
     } = this.entities;
 
-    this.after("READ", SchedulePriceRules.drafts, async (result, req) => {
+    const calculateFieldControls = async (result, req) => {
+        if (!result) return;
 
-        console.log("================================================");
-        console.log("AFTER READ - SchedulePriceRules");
-        console.log("Event:", req.event);
-        console.log("Query:");
-        console.dir(req.query, { depth: null });
-        console.log("Result:");
-        console.dir(result, { depth: null });
+        const records = Array.isArray(result) ? result : [result];
+        if (records.length === 0) return;
 
-        if (!result) {
-            console.log("No result returned.");
-            return;
+        // If salesorg is missing in the result (due to $select projection in draft READ), fetch it from DB using ID
+        const missingSalesOrgRecords = records.filter(r => r && r.salesorg === undefined && r.ID);
+        if (missingSalesOrgRecords.length > 0) {
+            const ids = missingSalesOrgRecords.map(r => r.ID);
+            const targetEntity = req.target || SchedulePriceRules;
+            const dbRecords = await SELECT.from(targetEntity).columns("ID", "salesorg").where({ ID: { in: ids } });
+            const idToSalesOrg = new Map(dbRecords.map(r => [r.ID, r.salesorg]));
+            for (const r of missingSalesOrgRecords) {
+                if (idToSalesOrg.has(r.ID)) {
+                    r.salesorg = idToSalesOrg.get(r.ID);
+                }
+            }
         }
 
-        if (!result.salesorg) {
-            console.log("salesorg not present in READ result.");
-            return;
+        const salesorgs = [...new Set(records.map(r => r && r.salesorg).filter(Boolean))];
+
+        let configs = [];
+        if (salesorgs.length > 0) {
+            configs = await SELECT.from(SalesOrgSchedules).where({ salesorg: { in: salesorgs } });
         }
+        const configMap = new Map(configs.map(c => [c.salesorg, c]));
 
-        console.log(`Looking up SalesOrgSchedules for ${result.salesorg}`);
-
-        const cfg = await SELECT.one
-            .from(SalesOrgSchedules)
-            .where({
-                salesorg: result.salesorg
-            });
-
-        console.log("Configuration found:");
-        console.dir(cfg, { depth: null });
-
-        if (!cfg) {
-            console.log("No configuration found. Setting all field controls to Hidden.");
-
-            result.fieldControl1 = 0;
-            result.fieldControl2 = 0;
-            result.fieldControl3 = 0;
-            result.fieldControl4 = 0;
-
-            return;
+        for (const record of records) {
+            if (!record) continue;
+            const cfg = record.salesorg ? configMap.get(record.salesorg) : null;
+            if (cfg) {
+                record.fieldControl1 = cfg.schedule1 ? 3 : 1;
+                record.fieldControl2 = cfg.schedule2 ? 3 : 1;
+                record.fieldControl3 = cfg.schedule3 ? 3 : 1;
+                record.fieldControl4 = cfg.schedule4 ? 3 : 1;
+            } else {
+                record.fieldControl1 = 1;
+                record.fieldControl2 = 1;
+                record.fieldControl3 = 1;
+                record.fieldControl4 = 1;
+            }
         }
+    };
 
-        result.fieldControl1 = cfg.schedule1 ? 3 : 0;
-        result.fieldControl2 = cfg.schedule2 ? 3 : 0;
-        result.fieldControl3 = cfg.schedule3 ? 3 : 0;
-        result.fieldControl4 = cfg.schedule4 ? 3 : 0;
-
-        console.log("Calculated Field Controls:");
-        console.log({
-            fieldControl1: result.fieldControl1,
-            fieldControl2: result.fieldControl2,
-            fieldControl3: result.fieldControl3,
-            fieldControl4: result.fieldControl4
-        });
-
-        console.log("Final Result:");
-        console.dir(result, { depth: null });
-        console.log("================================================");
-    });
+    this.after("READ", SchedulePriceRules, calculateFieldControls);
+    if (SchedulePriceRules.drafts) {
+        this.after("READ", SchedulePriceRules.drafts, calculateFieldControls);
+    }
 
 });
+
