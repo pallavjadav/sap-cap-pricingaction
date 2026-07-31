@@ -110,45 +110,86 @@ module.exports = class EnhancedPricingService extends cds.ApplicationService {
       ])
     })
 
-    this.on('UPDATE', 'PricingActionHeader.drafts', async (req, next) => {
-      logger.info('UPDATE event triggered for PricingActionHeader:', req.data)
-      if (!req._ || !req._.req || !req.data.File) {
-        console.log('No HTTP request stream available');
-        return next();
+    this.after("UPDATE", "PricingActionHeader.drafts", async (data, req) => {
+      // Ensure params are available and the File field was part of the update payload
+      if (!req.params || !req.params[0] || !req.data.File) return;
+
+      const draftId = req.params[0].ID;
+
+      // 1. Fetch the File field stream from the HANA draft database
+      const row = await SELECT.one
+        .from(PricingActionHeader.drafts)
+        .columns("File")
+        .where({ ID: draftId });
+
+      if (!row || !row.File) {
+        return;
       }
 
-      const chunks = [];
+      // 2. Helper utility to read the HANA stream into an operations buffer
+      const streamToBuffer = (stream) => {
+        return new Promise((resolve, reject) => {
+          const chunks = [];
+          stream.on('data', (chunk) => chunks.push(chunk));
+          stream.on('end', () => resolve(Buffer.concat(chunks)));
+          stream.on('error', (err) => reject(err));
+        });
+      };
 
-      for await (const chunk of req._.req) {
-        chunks.push(chunk);
+      try {
+        // 3. Resolve stream contents to memory buffer
+        const excelBuffer = await streamToBuffer(row.File);
+        console.log(`Excel file resolved completely from DB! Size: ${excelBuffer.length} bytes`);
+
+        // 4. Parse the Excel buffer into JSON rows
+        const workbook = XLSX.read(excelBuffer, { type: 'buffer' });
+        const firstSheetName = workbook.SheetNames[0];
+        const excelRows = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName]);
+        console.log('Parsed Rows from Excel:', excelRows);
+
+        if (excelRows.length === 0) return;
+
+        // 5. Fetch administrative info to properly link Draft items
+        const headerDraft = await SELECT.one
+          .from(PricingActionHeader.drafts)
+          .columns("DraftAdministrativeData_DraftUUID")
+          .where({ ID: draftId });
+
+        const draftAdminUUID = headerDraft?.DraftAdministrativeData_DraftUUID;
+
+        // 6. Enrich Excel data objects with runtime system properties
+        excelRows.forEach(item => {
+          item.ID = cds.utils.uuid(); // Generate a fresh GUID for every row item
+          item.parent_ID = draftId;
+          item.DraftAdministrativeData_DraftUUID = draftAdminUUID;
+          item.IsActiveEntity = false; // Important for Draft-to-Draft associations
+
+          // Dynamic date calculations conversion if serial numbers are present in columns
+          if (item.From_Date && typeof item.From_Date === 'number') {
+            item.From_Date = new Date(Date.UTC(1899, 11, 30) + item.From_Date * 86400000)
+              .toISOString()
+              .split("T")[0];
+          }
+          if (item.To_Date && typeof item.To_Date === 'number') {
+            item.To_Date = new Date(Date.UTC(1899, 11, 30) + item.To_Date * 86400000)
+              .toISOString()
+              .split("T")[0];
+          }
+        });
+
+        // 7. Wipe out prior uploaded items first if user re-uploads file inside same draft session
+        await DELETE.from(PricingActionItems.drafts).where({ parent_ID: draftId });
+
+        // 8. Bulk insert parsed Excel rows directly into the items draft table
+        await INSERT.into(PricingActionItems.drafts).entries(excelRows);
+        console.log(`Successfully imported ${excelRows.length} rows to PricingActionItems.drafts`);
+
+      } catch (streamError) {
+        req.error(500, `Failed to parse Excel file from HANA stream: ${streamError.message}`);
+        return;
       }
+    });
 
-      const buffer = Buffer.concat(chunks);
-
-      console.log(buffer.length);
-      // Parse Excel
-      const workbook = XLSX.read(buffer, { type: 'buffer' });
-
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-
-      const data = XLSX.utils.sheet_to_json(worksheet);
-      var { DraftAdministrativeData_DraftUUID } = await SELECT.one.from(PricingActionHeader.drafts).where({ ID: req.data.ID })
-      data.forEach(item => {
-        item.ID = cds.utils.uuid();
-        item.parent_ID = req.data.ID;
-        item.DraftAdministrativeData_DraftUUID = DraftAdministrativeData_DraftUUID;
-        item.From_Date = new Date(Date.UTC(1899, 11, 30) + 46204 * 86400000)
-          .toISOString()
-          .split("T")[0]
-        item.To_Date = new Date(Date.UTC(1899, 11, 30) + 46204 * 86400000)
-          .toISOString()
-          .split("T")[0]
-      });
-      await INSERT.into(PricingActionItems.drafts).entries(data)
-      console.log(data);
-      return next();
-    })
 
     this.after('READ', 'Products', async (products,req) => {
       if (!Array.isArray(products)) {

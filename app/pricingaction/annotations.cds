@@ -79,6 +79,11 @@ annotate EnhancedPricingService.PricingActionHeader with @(
                 Value : File,
                 Label : 'Import Pricing',
             },
+            {
+                $Type : 'UI.DataField',
+                Value : Pricing_Type,
+                Label : 'Pricing_Type',
+            },
         ],
     },
     UI.HeaderInfo : {
@@ -100,6 +105,12 @@ annotate EnhancedPricingService.PricingActionHeader with @(
 
 annotate EnhancedPricingService.PricingActionItems with @(
     UI.LineItem #ItemTable : [
+        {
+            $Type : 'UI.DataField',
+            Value : PPG,
+            Label : 'PPG',
+            @UI.Hidden: (parent.Pricing_Type = 'M'),
+        },
         {
             $Type : 'UI.DataField',
             Value : Material_Number,
@@ -154,7 +165,7 @@ annotate EnhancedPricingService.PricingActionHeader with {
             ],
             Label : 'Sales Organization',
         },
-        Common.ValueListWithFixedValues : true,
+        Common.ValueListWithFixedValues : false,
         Common.FieldControl : #Mandatory,
 )};
 
@@ -173,10 +184,19 @@ annotate EnhancedPricingService.PricingActionItems with {
                     LocalDataProperty : Material_Number,
                     ValueListProperty : 'Product',
                 },
+                {
+                    $Type : 'Common.ValueListParameterDisplayOnly',
+                    ValueListProperty : 'to_Description/ProductDescription',
+                },
+                {
+                    $Type : 'Common.ValueListParameterInOut',
+                    LocalDataProperty : parent.Sales_Org,
+                    ValueListProperty : 'to_SalesDelivery/ProductSalesOrg',
+                },
             ],
             Label : 'Material',
         },
-        Common.ValueListWithFixedValues : true,
+        Common.ValueListWithFixedValues : false,
 )};
 
 annotate EnhancedPricingService.PricingActionHeader with {
@@ -202,5 +222,16 @@ annotate EnhancedPricingService.Seasons with {
 
 annotate EnhancedPricingService.PricingActionHeader with {
     Pricing_Action_Name @Common.FieldControl : #Mandatory
+};
+
+
+annotate EnhancedPricingService.PricingActionHeader with @UI.PresentationVariant: {RequestAtLeast: [
+    Pricing_Type
+]};
+annotate EnhancedPricingService.PricingActionItems with @UI.PresentationVariant: {RequestAtLeast: [
+    parent.Pricing_Type
+]};
+annotate EnhancedPricingService.PricingActionHeader with {
+    Pricing_Type @Common.FieldControl : #ReadOnly
 };
 

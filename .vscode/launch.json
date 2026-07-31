@@ -8,15 +8,18 @@
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "cds",
       "args": [
-        "serve",
-        "--in-memory?"
+        "watch",
+        "--profile",
+        "hybrid",
+        "--livereload",
+        "false"
       ],
       "console": "internalConsole",
       "internalConsoleOptions": "openOnSessionStart",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "envFile": "${workspaceFolder}/.env1",
+      "envFile": "${workspaceFolder}/.cdsrc-private.json",
       "env": {
         "NODE_ENV": "development",
         "run.config": "{\"handlerId\":\"cap_run_config_handler_id\",\"runnableId\":\"{\\\"projectPath\\\":\\\"/home/user/projects/pricingaction\\\",\\\"profileName\\\":\\\"development\\\"}\"}"
